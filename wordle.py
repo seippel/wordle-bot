@@ -1,4 +1,5 @@
-#!C:\Python38\python.exe
+#!python3.8
+
 import random, argparse, sys, requests
 from datetime import datetime
 from string import ascii_lowercase
