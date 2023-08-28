@@ -382,7 +382,10 @@ def letmeguessfunc():
         prune_answers(guess_value)
         attempt_count = attempt_count + 1
     print()
-    print('You solved it in ' + str(attempt_count) + ' guesses.')
+    if len(answers) == 0:
+        print("You've eliminated all possible answers.  Check your input and try again.")
+    else:
+        print('Only one possible word remaining - You have used ' + str(attempt_count) + ' guesses to get to this point.')
     return
     
     
