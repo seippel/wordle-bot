@@ -21,6 +21,7 @@ def main():
     global guess_count
     global questioner
     global solver
+    letmeguess = False
     wordle = ""
     guess_count = 0
     loop_count = 1
@@ -32,7 +33,8 @@ def main():
     parser = argparse.ArgumentParser(description='Generate or solve Wordle puzzle.')
     parser.add_argument('--question', action='store_true', help="generate a wordle to solve")
     parser.add_argument('--solve', action='store_true', help="solve a wordle using the bot")
-    parser.add_argument('--count', type=int, default=1, help ="count for number of times bot should play itself")
+    parser.add_argument('--count', type=int, default=1, help="count for number of times bot should play itself")
+    parser.add_argument('--letmeguess', action='store_true', help="Enter your own guesses and scores to see how many possible answers you have left")
     parser.add_argument('--allwords', action ='store_true', help="Have bot solve all words once (for stats).\r\n" +
                         "This option sets both --question and --solve.")
     args = parser.parse_args()
@@ -44,7 +46,9 @@ def main():
     if args.allwords:
         questioner = True
         solver = True
-    if not questioner and not solver:
+    if args.letmeguess:
+        letmeguess = True
+    if not questioner and not solver and not letmeguess:
         parser.print_help()
         parser.exit()
     with open('answers.txt') as f:
@@ -57,6 +61,9 @@ def main():
     if (questioner and not solver):
         wordle = generate_wordle(wordle_list)
         print(wordle)
+        parser.exit()
+    if letmeguess:
+        letmeguessfunc()
         parser.exit()
     with open('guesses.txt') as f:
         guesses = f.read().splitlines()
@@ -78,7 +85,6 @@ def main():
             print('--------------------------')
             print("computer guess is: ", computer_guess)
             current_guess = computer_guess
-            #current_guess = answers[rand]
             solution_found = guess(wordle, computer_guess)
         total_guesses = total_guesses + guess_count
         max_guesses = max(max_guesses, guess_count)
@@ -216,6 +222,11 @@ def have_bot_guess_algo3(answers, combined_list):
     #It then determines what the maximum number of remaining answers would be given that guess (worst case)
     #This algorithm solves the full answer bank with an average of 3.62 guesses (max is 5)
     distribution = {}
+    if len(answers) == 0:
+        print('**************************************************************************************')
+        print('* ERROR: Out of possible answers - check to be sure you entered the scores correctly *')
+        print('**************************************************************************************')
+        sys.exit(1)
     best_guess = answers[0]
     best_guess_max = len(answers)  #Worst case is all answers give the same score
     if guess_count == 0:
@@ -254,6 +265,8 @@ def have_bot_guess_algo3(answers, combined_list):
             best_guess = possible_guess
             best_guess_max = guess_max
         else:
+            #If there is a tie between a word not in the possible answers and one in the answers
+            #guess the one that could possibly be an answer
             if guess_max == best_guess_max and possible_guess in answers:
                 best_guess = possible_guess
                 best_guess_max = guess_max    
@@ -350,6 +363,28 @@ def prune_answers(guess_value):
                     remove_list.append(answer_val)
     for wrong_word in remove_list:
         answers.remove(wrong_word)    
+
+def letmeguessfunc():
+    global current_guess
+    attempt_count = 0
+    while len(answers) > 1:
+        print('-----------------------------------------')
+        current_guess = ''
+        guess_value = ''
+        print('possible words remaining: ' + str(len(answers)))
+        while len(current_guess) != 5:
+            print('Enter the word you guessed')
+            current_guess = input()
+        while len(guess_value) != 5 or (guess_value.count('X') + guess_value.count('*') + guess_value.count('!') != 5):
+            print()
+            print('Score the guess in the format: X*! (X is complete miss, * is correct letter and spot, ! is correct letter, wrong spot)')
+            guess_value = input()
+        prune_answers(guess_value)
+        attempt_count = attempt_count + 1
+    print()
+    print('You solved it in ' + str(attempt_count) + ' guesses.')
+    return
+    
     
 def score_guess(wordle, guess):
     response = '     '

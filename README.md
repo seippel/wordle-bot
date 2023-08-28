@@ -11,3 +11,4 @@ Typical usage would be: `wordle.py --solve` and input the words the bot first gu
 * This program can generate a random word from the wordle answer list `wordle.py --question`
 * To get the program to generate a random word from the wordle answer list and solve that word `wordle.py --question --solve`
 * To get the program to solve all words in the answer list (this can take some time, but is useful for judging improvements to the algorithm) `wordle.py --allwords`.  A box showing cumulative stats is shown after each word is solved.
+* To check your own answers and see how many possible words you had left after each `wordle.py --letmeguess`
